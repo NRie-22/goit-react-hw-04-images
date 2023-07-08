@@ -1,89 +1,104 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { ImageErrorView } from './ImageErrorView/ImageErrorView';
-import { imgApi } from '../service/imgApi';
+import { imgApi } from 'service/imgApi';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
 import { Modal } from './Modal/Modal';
 
-const App = () => {
-  const [textQuery, setTextQuery] = useState('');
-  const [images, setImages] = useState([]);
-  const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [error, setError] = useState(null);
-  const [totalPage, setTotalPage] = useState(null);
-  const [imgUrl, setImgUrl] = useState('');
-  const [tag, setTag] = useState('');
+export default class App extends Component {
+  state = {
+    textQuery: '',
+    images: [],
+    page: 1,
+    loading: false,
+    showModal: false,
+    error: null,
+    totalPage: null,
+  };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!textQuery || page === 1) return;
+  async componentDidUpdate(_, prevState) {
+    let { page } = this.state;
+    const prevSearchValue = prevState.textQuery;
+    const nextSearchValue = this.state.textQuery;
 
-      setLoading(true);
+    // Проверяем, изменились ли значения поискового запроса или страницы
+    if (prevSearchValue !== nextSearchValue || prevState.page !== page) {
+      // Запускаем индикатор загрузки
+      this.setState({ loading: true });
 
+      // Отправляем запрос на бэкенд
       try {
-        const response = await imgApi(textQuery, page);
+        const response = await imgApi(nextSearchValue, page);
         const { hits, totalHits } = response.data;
-
-        setImages(prevImages => [...prevImages, ...hits]);
-        setTotalPage(totalHits);
+        this.setState(prevState => ({
+          images: [...prevState.images, ...hits],
+          totalPage: totalHits,
+        }));
       } catch (error) {
-        setError('Something went wrong. Please try again.');
+        this.setState({ error: 'Something wrong. Please try again.' });
       } finally {
-        setLoading(false);
+        this.setState({ loading: false });
       }
-    };
+    }
+  }
 
-    fetchData();
-  }, [textQuery, page]);
-
-  const handleSubmit = searchValue => {
-    setTextQuery(searchValue);
-    setPage(1);
-    setImages([]);
-    setLoading(false);
-    setShowModal(false);
-    setError(null);
-    setTotalPage(null);
+  // Обработчик отправки поискового запроса из Searchbar
+  handleSubmit = searchValue => {
+    this.setState({
+      textQuery: searchValue,
+      page: 1,
+      images: [],
+      loading: false,
+      showModal: false,
+      error: null,
+      totalPage: null,
+    });
   };
 
-  const onLoadMore = () => {
-    setPage(prevPage => prevPage + 1);
+  // Обработчик кнопки "Загрузить еще"
+  onLoadMore = () => {
+    this.setState(prevState => ({ page: prevState.page + 1 }));
   };
 
-  const onOpenModal = (imgUrl, tag) => {
-    setShowModal(true);
-    setImgUrl(imgUrl);
-    setTag(tag);
+  // Обработчик открытия модального окна
+  onOpenModal = (imgUrl, tag) => {
+    this.setState({ showModal: true, imgUrl, tag });
   };
 
-  const onCloseModal = () => {
-    setShowModal(false);
+  // Обработчик закрытия модального окна
+  onCloseModal = () => {
+    this.setState({ showModal: false });
   };
 
-  return (
-    <>
-      <Searchbar onSubmit={handleSubmit} />
-      <ImageGallery images={images} openModal={onOpenModal} />
+  render() {
+    const { images, showModal, imgUrl, tag, loading, totalPage, error, page } =
+      this.state;
+    return (
+      <>
+        <Searchbar onSubmit={this.handleSubmit} />
+        <ImageGallery images={images} openModal={this.onOpenModal} />
 
-      {showModal && (
-        <Modal onClose={onCloseModal}>
-          <img src={imgUrl} alt={tag} />
-        </Modal>
-      )}
+        {/* Модальное окно */}
+        {showModal && (
+          <Modal onClose={this.onCloseModal}>
+            <img src={imgUrl} alt={tag} />
+          </Modal>
+        )}
 
-      <Loader isLoading={loading} />
+        {/* Индикатор загрузки */}
+        <Loader isLoading={loading} />
 
-      {totalPage / 12 > page && <Button loadMore={onLoadMore} />}
+        {/* Кнопка "Загрузить еще" */}
+        {totalPage / 12 > page && <Button loadMore={this.onLoadMore} />}
 
-      {totalPage === 0 && <ImageErrorView />}
+        {/* Ничего не найдено */}
+        {totalPage === 0 && <ImageErrorView />}
 
-      {error && <ImageErrorView>{error}</ImageErrorView>}
-    </>
-  );
-};
-
-export default App;
+        {/* Ошибка запроса */}
+        {error && <ImageErrorView>{error}</ImageErrorView>}
+      </>
+    );
+  }
+}

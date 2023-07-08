@@ -1,4 +1,4 @@
-export const notificationMassege = 'Please enter something for search.';
+export const notificationMassege = 'Please enter something for seach.';
 
 export const notificationOptions = {
   position: 'top-center',

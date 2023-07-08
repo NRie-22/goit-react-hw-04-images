@@ -1,13 +1,12 @@
-import React from 'react';
 import styled from '@emotion/styled';
 
-const ImageItem = styled.li`
+export const ImageItem = styled.li`
   border-radius: 2px;
   box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.2),
     0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12);
 `;
 
-const Img = styled.img`
+export const Img = styled.img`
   width: 100%;
   height: 260px;
   border-radius: 5px;
@@ -18,12 +17,3 @@ const Img = styled.img`
     cursor: zoom-in;
   }
 `;
-
-export default function ImageGalleryItem() {
-  return (
-    <ImageItem>
-      {/* Ваш код компонента */}
-      <Img />
-    </ImageItem>
-  );
-}
