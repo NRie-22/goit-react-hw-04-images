@@ -1,10 +1,12 @@
 import axios from 'axios';
-export async function imgApi(query, page) {
-  const API_URL = 'https://pixabay.com/api/';
-  // параметри запиту на бекенд
+
+const API_URL = 'https://pixabay.com/api/';
+const API_KEY = '34991535-a7425182e30d9d17c0e128526';
+
+export const imgApi = async (query, page) => {
   const options = {
     params: {
-      key: '34991535-a7425182e30d9d17c0e128526',
+      key: API_KEY,
       q: query,
       image_type: 'photo',
       orientation: 'horizontal',
@@ -16,4 +18,4 @@ export async function imgApi(query, page) {
 
   const response = await axios.get(API_URL, options);
   return response;
-}
+};
