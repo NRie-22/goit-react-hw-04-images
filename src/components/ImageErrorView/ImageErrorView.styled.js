@@ -1,6 +1,6 @@
 import styled from '@emotion/styled';
 
-export const Wraper = styled.div`
+export const Wrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -13,7 +13,7 @@ export const Text = styled.p`
   max-width: 80%;
   color: black;
   text-align: center;
-  font-family: 500;
+  font-family: 'Arial', sans-serif;
   font-size: 22px;
 `;
 

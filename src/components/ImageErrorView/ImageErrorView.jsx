@@ -1,11 +1,14 @@
+import React from 'react';
 import oops from '../../assets/oops.png';
-import { Wraper, Img, Text } from './ImageErrorView.styled';
+import { Wrapper, Img, Text } from './ImageErrorView.styled';
 
-export const  ImageErrorView= () => {
+export const ImageErrorView = () => {
   return (
-    <Wraper>
+    <Wrapper>
       <Img src={oops} alt="oops" width="240" />
       <Text>Oops... There are no images matching your search...</Text>
-    </Wraper>
+    </Wrapper>
   );
-}
+};
+
+export default ImageErrorView;
