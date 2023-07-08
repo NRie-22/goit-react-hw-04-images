@@ -1,6 +1,7 @@
+import React from 'react';
 import styled from '@emotion/styled';
 
-export const Overlay = styled.div`
+const Overlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
@@ -13,7 +14,15 @@ export const Overlay = styled.div`
   z-index: 1200;
 `;
 
-export const ModalDiv = styled.div`
+const ModalDiv = styled.div`
   max-width: calc(100vw - 48px);
   max-height: calc(100vh - 24px);
 `;
+
+export default function Modal() {
+  return (
+    <Overlay>
+      <ModalDiv>{/* Ваш код компонента */}</ModalDiv>
+    </Overlay>
+  );
+}

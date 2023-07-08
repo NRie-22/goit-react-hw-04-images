@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import { GalleryList } from './ImageGallery.styled';
 
-import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
+import { ImageGalleryItem } from 'components/ImageGalleryItem';
 
 export const ImageGallery = ({ images, openModal }) => {
   return (

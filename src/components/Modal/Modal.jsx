@@ -1,44 +1,45 @@
-import React, { Component } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Overlay, ModalDiv } from './Modal.styled';
 
 const modalRoot = document.querySelector('#modal-root');
 
-export class Modal extends Component {
-  // слушатель для клавиш
-  componentDidMount() {
-    window.addEventListener('keydown', this.handleClickEsc);
-  }
+const Modal = ({ children, onClose }) => {
+  const handleClickEsc = useCallback(
+    e => {
+      if (e.code === 'Escape') {
+        onClose();
+      }
+    },
+    [onClose]
+  );
 
-  // очищаем после себя при закрытии модального окна
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.handleClickEsc);
-  }
+  const handleClickBackdrop = useCallback(
+    e => {
+      if (e.currentTarget === e.target) {
+        onClose();
+      }
+    },
+    [onClose]
+  );
 
-  handleClickEsc = e => {
-    // проверка на нажатие клавиши Esc
-    if (e.code === 'Escape') {
-      this.props.onClose();
-    }
-  };
+  useEffect(() => {
+    const handleKeyDown = e => {
+      handleClickEsc(e);
+    };
 
-  // закрытие модального окна по клику на бекдроп
-  handleClickBackdrop = e => {
-    // проверка, был ли клик на бекдропе
-    if (e.currentTarget === e.target) {
-      this.props.onClose();
-    }
-  };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleClickEsc]);
 
-  render() {
-    const { children } = this.props;
-    return createPortal(
-      <Overlay onClick={this.handleClickBackdrop}>
-        <ModalDiv>{children}</ModalDiv>
-      </Overlay>,
-      modalRoot
-    );
-  }
-}
+  return createPortal(
+    <Overlay onClick={handleClickBackdrop}>
+      <ModalDiv>{children}</ModalDiv>
+    </Overlay>,
+    modalRoot
+  );
+};
 
 export default Modal;
