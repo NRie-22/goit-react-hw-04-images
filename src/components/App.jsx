@@ -4,14 +4,14 @@ import { ImageGallery } from './ImageGallery/ImageGallery';
 import { ImageErrorView } from './ImageErrorView/ImageErrorView';
 import { imgApi } from '../service/imgApi';
 
-import { Button } from './Button/Button';
+import Button from './Button/Button';
 import { Loader } from './Loader/Loader.styled';
 import Modal from './Modal/Modal';
 
 export default function App() {
   const [textQuery, setTextQuery] = useState('');
   const [images, setImages] = useState([]);
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState(null);
@@ -24,23 +24,23 @@ export default function App() {
       if (!textQuery) return;
       setLoading(true);
       try {
-        const response = await imgApi(textQuery, page);
+        const response = await imgApi(textQuery, currentPage);
         const { hits, totalHits } = response.data;
         setImages(prevImages => [...prevImages, ...hits]);
         setTotalPage(totalHits);
       } catch (error) {
-        setError('Something wrong. Please try again.');
+        setError('Что-то пошло не так. Пожалуйста, попробуйте снова.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [textQuery, page]);
+  }, [textQuery, currentPage]);
 
   const handleSubmit = searchValue => {
     setTextQuery(searchValue);
-    setPage(1);
+    setCurrentPage(1);
     setImages([]);
     setLoading(false);
     setShowModal(false);
@@ -49,7 +49,7 @@ export default function App() {
   };
 
   const onLoadMore = () => {
-    setPage(prevPage => prevPage + 1);
+    setCurrentPage(prevPage => prevPage + 1);
   };
 
   const onOpenModal = (imgUrl, tag) => {
@@ -75,7 +75,9 @@ export default function App() {
       )}
       {loading && <Loader />}
       {error && <ImageErrorView errorMessage={error} />}
-      {totalPage && page < totalPage && <Button onLoadMore={onLoadMore} />}
+      {totalPage && currentPage < totalPage && (
+        <Button onLoadMore={onLoadMore} />
+      )}
     </>
   );
 }
