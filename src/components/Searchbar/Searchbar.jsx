@@ -1,56 +1,48 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import { HiMagnifyingGlass } from 'react-icons/hi2';
 import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { Header, Form, Button, Input } from './Searchbar.styled';
 import {
   notificationMassege,
   notificationOptions,
 } from '../Notification/Notification';
 
-export class Searchbar extends Component {
-  state = {
-    textQuery: '',
-  };
-  // стежимо за змінами Input (контрольований елемент)
-  onChangeInput = e => {
-    this.setState({ textQuery: e.currentTarget.value.trim().toLowerCase() });
+export function Searchbar({ onSubmit }) {
+  const [textQuery, setTextQuery] = useState('');
+
+  const onChangeInput = e => {
+    setTextQuery(e.target.value.trim().toLowerCase());
   };
 
-  handleSubmit = e => {
+  const handleSubmit = e => {
     e.preventDefault();
-    const { textQuery } = this.state;
-    const { onSubmit } = this.props;
-    // повідомлення
+    // Проверка на пустой поисковый запрос
     if (textQuery === '') {
-      toast.error(`${notificationMassege}`, notificationOptions);
+      toast.error(notificationMassege, notificationOptions);
+    } else {
+      onSubmit(textQuery);
+      setTextQuery('');
     }
-    //фун-я onSubmit прийшла з App через пропси
-    onSubmit(textQuery);
-
-    //очистка рядка пошука
-    this.setState({ textQuery: '' });
   };
 
-  render() {
-    const { textQuery } = this.state;
-    return (
-      <Header>
-        <Form onSubmit={this.handleSubmit}>
-          <Button type="submit">
-            <HiMagnifyingGlass size="24" />
-          </Button>
+  return (
+    <Header>
+      <Form onSubmit={handleSubmit}>
+        <Button type="submit">
+          <HiMagnifyingGlass size="24" />
+        </Button>
 
-          <Input
-            value={textQuery}
-            onChange={this.onChangeInput}
-            type="text"
-            autocomplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-          />
-        </Form>
-        <ToastContainer />
-      </Header>
-    );
-  }
+        <Input
+          value={textQuery}
+          onChange={onChangeInput}
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+        />
+      </Form>
+      <ToastContainer />
+    </Header>
+  );
 }

@@ -1,104 +1,81 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { ImageErrorView } from './ImageErrorView/ImageErrorView';
-import { imgApi } from 'service/imgApi';
+import { imgApi } from '../service/imgApi';
+
 import { Button } from './Button/Button';
-import { Loader } from './Loader/Loader';
-import { Modal } from './Modal/Modal';
+import { Loader } from './Loader/Loader.styled';
+import Modal from './Modal/Modal';
 
-export default class App extends Component {
-  state = {
-    textQuery: '',
-    images: [],
-    page: 1,
-    loading: false,
-    showModal: false,
-    error: null,
-    totalPage: null,
-  };
+export default function App() {
+  const [textQuery, setTextQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [error, setError] = useState(null);
+  const [totalPage, setTotalPage] = useState(null);
+  const [imgUrl, setImgUrl] = useState('');
+  const [tag, setTag] = useState('');
 
-  async componentDidUpdate(_, prevState) {
-    let { page } = this.state;
-    const prevSearchValue = prevState.textQuery;
-    const nextSearchValue = this.state.textQuery;
-
-    // Проверяем, изменились ли значения поискового запроса или страницы
-    if (prevSearchValue !== nextSearchValue || prevState.page !== page) {
-      // Запускаем индикатор загрузки
-      this.setState({ loading: true });
-
-      // Отправляем запрос на бэкенд
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!textQuery) return;
+      setLoading(true);
       try {
-        const response = await imgApi(nextSearchValue, page);
+        const response = await imgApi(textQuery, page);
         const { hits, totalHits } = response.data;
-        this.setState(prevState => ({
-          images: [...prevState.images, ...hits],
-          totalPage: totalHits,
-        }));
+        setImages(prevImages => [...prevImages, ...hits]);
+        setTotalPage(totalHits);
       } catch (error) {
-        this.setState({ error: 'Something wrong. Please try again.' });
+        setError('Something wrong. Please try again.');
       } finally {
-        this.setState({ loading: false });
+        setLoading(false);
       }
-    }
-  }
+    };
 
-  // Обработчик отправки поискового запроса из Searchbar
-  handleSubmit = searchValue => {
-    this.setState({
-      textQuery: searchValue,
-      page: 1,
-      images: [],
-      loading: false,
-      showModal: false,
-      error: null,
-      totalPage: null,
-    });
+    fetchData();
+  }, [textQuery, page]);
+
+  const handleSubmit = searchValue => {
+    setTextQuery(searchValue);
+    setPage(1);
+    setImages([]);
+    setLoading(false);
+    setShowModal(false);
+    setError(null);
+    setTotalPage(null);
   };
 
-  // Обработчик кнопки "Загрузить еще"
-  onLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const onLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  // Обработчик открытия модального окна
-  onOpenModal = (imgUrl, tag) => {
-    this.setState({ showModal: true, imgUrl, tag });
+  const onOpenModal = (imgUrl, tag) => {
+    setImgUrl(imgUrl);
+    setTag(tag);
+    setShowModal(true);
   };
 
-  // Обработчик закрытия модального окна
-  onCloseModal = () => {
-    this.setState({ showModal: false });
+  const onCloseModal = () => {
+    setShowModal(false);
   };
 
-  render() {
-    const { images, showModal, imgUrl, tag, loading, totalPage, error, page } =
-      this.state;
-    return (
-      <>
-        <Searchbar onSubmit={this.handleSubmit} />
-        <ImageGallery images={images} openModal={this.onOpenModal} />
+  return (
+    <>
+      <Searchbar onSubmit={handleSubmit} />
+      <ImageGallery images={images} openModal={onOpenModal} />
 
-        {/* Модальное окно */}
-        {showModal && (
-          <Modal onClose={this.onCloseModal}>
-            <img src={imgUrl} alt={tag} />
-          </Modal>
-        )}
-
-        {/* Индикатор загрузки */}
-        <Loader isLoading={loading} />
-
-        {/* Кнопка "Загрузить еще" */}
-        {totalPage / 12 > page && <Button loadMore={this.onLoadMore} />}
-
-        {/* Ничего не найдено */}
-        {totalPage === 0 && <ImageErrorView />}
-
-        {/* Ошибка запроса */}
-        {error && <ImageErrorView>{error}</ImageErrorView>}
-      </>
-    );
-  }
+      {/* Модальное окно */}
+      {showModal && (
+        <Modal onClose={onCloseModal}>
+          <img src={imgUrl} alt={tag} />
+        </Modal>
+      )}
+      {loading && <Loader />}
+      {error && <ImageErrorView errorMessage={error} />}
+      {totalPage && page < totalPage && <Button onLoadMore={onLoadMore} />}
+    </>
+  );
 }

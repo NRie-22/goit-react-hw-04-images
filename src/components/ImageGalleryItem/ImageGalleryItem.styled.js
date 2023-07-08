@@ -17,3 +17,20 @@ export const Img = styled.img`
     cursor: zoom-in;
   }
 `;
+
+const ImageGalleryItem = ({ item, openModal }) => {
+  const { largeImageURL, tags, webformatURL } = item;
+
+  const handleClick = e => {
+    e.preventDefault();
+    openModal(largeImageURL, tags);
+  };
+
+  return (
+    <ImageItem onClick={handleClick}>
+      <Img src={webformatURL} alt={tags} loading="lazy" />
+    </ImageItem>
+  );
+};
+
+export default ImageGalleryItem;

@@ -1,15 +1,17 @@
 import PropTypes from 'prop-types';
 import { ImageItem, Img } from './ImageGalleryItem.styled';
 
-export const ImageGalleryItem = ({ item, openModal }) => {
+
+const ImageGalleryItem = ({ item, openModal }) => {
   const { largeImageURL, tags, webformatURL } = item;
+
+  const handleClick = e => {
+    e.preventDefault();
+    openModal(largeImageURL, tags);
+  };
+
   return (
-    <ImageItem
-      onClick={e => {
-        e.preventDefault();
-        openModal(largeImageURL, tags);
-      }}
-    >
+    <ImageItem onClick={handleClick}>
       <Img src={webformatURL} alt={tags} loading="lazy" />
     </ImageItem>
   );
@@ -23,3 +25,5 @@ ImageGalleryItem.propTypes = {
   }).isRequired,
   openModal: PropTypes.func.isRequired,
 };
+
+export default ImageGalleryItem;
