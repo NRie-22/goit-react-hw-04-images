@@ -3,12 +3,11 @@ import { Searchbar } from './Searchbar/Searchbar';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { ImageErrorView } from './ImageErrorView/ImageErrorView';
 import { imgApi } from '../service/imgApi';
-
 import Button from './Button/Button';
 import { Loader } from './Loader/Loader.styled';
 import Modal from './Modal/Modal';
 
-export default function App() {
+const App = () => {
   const [textQuery, setTextQuery] = useState('');
   const [images, setImages] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -16,8 +15,7 @@ export default function App() {
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState(null);
   const [totalPage, setTotalPage] = useState(null);
-  const [imgUrl, setImgUrl] = useState('');
-  const [tag, setTag] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,7 +27,7 @@ export default function App() {
         setImages(prevImages => [...prevImages, ...hits]);
         setTotalPage(totalHits);
       } catch (error) {
-        setError('Что-то пошло не так. Пожалуйста, попробуйте снова.');
+        setError('Something went wrong. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -48,36 +46,39 @@ export default function App() {
     setTotalPage(null);
   };
 
-  const onLoadMore = () => {
+  const handleLoadMore = () => {
     setCurrentPage(prevPage => prevPage + 1);
   };
 
-  const onOpenModal = (imgUrl, tag) => {
-    setImgUrl(imgUrl);
-    setTag(tag);
+  const handleOpenModal = (imageUrl, imageAlt) => {
+    setSelectedImage({ url: imageUrl, alt: imageAlt });
     setShowModal(true);
   };
 
-  const onCloseModal = () => {
+  const handleCloseModal = () => {
     setShowModal(false);
   };
 
   return (
     <>
       <Searchbar onSubmit={handleSubmit} />
-      <ImageGallery images={images} openModal={onOpenModal} />
+      <ImageGallery images={images} openModal={handleOpenModal} />
 
-      {/* Модальное окно */}
       {showModal && (
-        <Modal onClose={onCloseModal}>
-          <img src={imgUrl} alt={tag} />
+        <Modal onClose={handleCloseModal}>
+          {selectedImage && (
+            <img src={selectedImage.url} alt={selectedImage.alt} />
+          )}
         </Modal>
       )}
+
       {loading && <Loader />}
       {error && <ImageErrorView errorMessage={error} />}
       {totalPage && currentPage < totalPage && (
-        <Button onLoadMore={onLoadMore} />
+        <Button onLoadMore={handleLoadMore} />
       )}
     </>
   );
-}
+};
+
+export default App;
